@@ -1,26 +1,29 @@
 export class PlayerShip {
-  constructor(position) {
-    this.position = position;
-    this.speed = { x: 2, y: 0 }; // speed fixed
+  constructor({ position, velocity }) {
+    this.position = position; // {x, y}
+    this.velocity = velocity;
     this.rotation = 0;
   }
 
   draw(context) {
+    context.resetTransform(); // Reset the canvas coordinate system
+    context.translate(this.position.x, this.position.y); // Translate to the ship's position
+    context.rotate(this.rotation); // Rotate the canvas
 
+    // Draw the ship's graphics here
     context.beginPath();
-    context.moveTo(this.position.x + 30, this.position.y);
-    context.lineTo(this.position.x - 10, this.position.y - 10);
-    context.lineTo(this.position.x - 10, this.position.y + 10);
+    context.moveTo(30, 0);
+    context.lineTo(-10, -10);
+    context.lineTo(-10, 10);
     context.closePath();
 
     context.strokeStyle = 'white';
     context.stroke();
-    context.restore();
   }
 
   update(context) {
     this.draw(context);
-    this.position.x += this.speed.x;
-    this.position.y += this.speed.y;
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
   }
 }
