@@ -1,18 +1,26 @@
-class PlayerShip {
-  constructor(context, position) {
+export class PlayerShip {
+  constructor(position) {
     this.position = position;
-    this.speed = 2;             // speed fixed
-    this.context = context;     // canvas context
+    this.speed = { x: 2, y: 0 }; // speed fixed
     this.rotation = 0;
   }
 
-  draw() {
-    // draw the ship on the screen (canvas)
-    this.context.draw(this.image, 0, 0);
+  draw(context) {
+
+    context.beginPath();
+    context.moveTo(this.position.x + 30, this.position.y);
+    context.lineTo(this.position.x - 10, this.position.y - 10);
+    context.lineTo(this.position.x - 10, this.position.y + 10);
+    context.closePath();
+
+    context.strokeStyle = 'white';
+    context.stroke();
+    context.restore();
   }
 
-  update() {
-    // move the ship
+  update(context) {
+    this.draw(context);
+    this.position.x += this.speed.x;
+    this.position.y += this.speed.y;
   }
-
 }
