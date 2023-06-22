@@ -23,16 +23,20 @@ export class Movement {
 
   updateMovement() {
     const { keyState, playerShip, game } = this;
+    const acceleration = 0.2; // acceleration
+    const maxSpeed = 4; // maximum speed
 
     if (keyState['KeyW']) {
-      const speed = 3;
-      const angle = playerShip.rotation;
-      const velocityX = speed * Math.cos(angle);
-      const velocityY = speed * Math.sin(angle);
-      playerShip.velocity = { x: velocityX, y: velocityY };
+      const speed = Math.sqrt(playerShip.velocity.x ** 2 + playerShip.velocity.y ** 2); // calculate speed
+      if (speed < maxSpeed) {
+        const angle = playerShip.rotation;
+        const velocityX = playerShip.velocity.x + acceleration * Math.cos(angle);
+        const velocityY = playerShip.velocity.y + acceleration * Math.sin(angle);
+        playerShip.velocity = { x: velocityX, y: velocityY }; // update velocity
+      }
     } else {
-      playerShip.velocity.x *= 0.9;
-      playerShip.velocity.y *= 0.9;
+      playerShip.velocity.x *= 0.99; // friction x
+      playerShip.velocity.y *= 0.99; // friction y
     }
 
     if (keyState['KeyA']) {
