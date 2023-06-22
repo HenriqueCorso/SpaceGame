@@ -20,7 +20,7 @@ export class Asteroid {
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
 
-    // Wrap around the screen
+    // wrap around the screen
     if (this.position.x < -this.radius) {
       this.position.x = canvas.width + this.radius;
     } else if (this.position.x > canvas.width + this.radius) {
