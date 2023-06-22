@@ -2,7 +2,7 @@ export class Projectile {
   constructor(position, velocity) {
     this.position = position;
     this.velocity = velocity;
-    this.radius = 5;
+    this.radius = 2;
   }
 
   draw(context) {
@@ -10,14 +10,12 @@ export class Projectile {
     context.beginPath();
     context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, false);
     context.closePath();
-    context.fillStyle = 'white';
-    context.fill();
+    context.strokeStyle = 'white';
+    context.stroke();
   }
 
-  update(context) {
-    this.draw(context);
+  update() {
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
   }
-
 }
