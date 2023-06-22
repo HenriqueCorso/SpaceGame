@@ -13,34 +13,41 @@ export class Game {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // create player ship
     this.player = new PlayerShip({
       position: { x: this.canvas.width / 2, y: this.canvas.height / 2 },
       velocity: { x: 0, y: 0 }
     });
 
+    // start movement
     this.movement = new Movement(this.player, this);
 
-    this.projectiles = []; // Array to store projectiles
-    this.asteroids = []; // Array to store asteroids
+    this.projectiles = [];
 
+    this.asteroids = [];
+
+    // add asteroids
     this.spawnAsteroids();
   }
 
   spawnAsteroids() {
-    const spawnInterval = 2000; // Interval between asteroid spawns in milliseconds
+    const spawnInterval = 2000; // interval between asteroid
+    const maxAsteroids = 25; // maximum number of asteroids
 
     setInterval(() => {
-      const radius = Math.floor(Math.random() * 41) + 10; // Random radius between 10 and 50
-      const position = this.getRandomEdgePosition(radius);
-      const velocity = this.getRandomVelocity();
+      if (this.asteroids.length < maxAsteroids) {
+        const radius = Math.floor(Math.random() * 41) + 10; // random radius
+        const position = this.getRandomEdgePosition(radius); // random edge position
+        const velocity = this.getRandomVelocity(); // random velocity
 
-      const asteroid = new Asteroid(position, velocity, radius);
-      this.asteroids.push(asteroid);
+        const asteroid = new Asteroid(position, velocity, radius); // new asteroid
+        this.asteroids.push(asteroid);
+      }
     }, spawnInterval);
   }
 
   getRandomEdgePosition(radius) {
-    const edge = Math.floor(Math.random() * 4); // Randomly select an edge (0-3)
+    const edge = Math.floor(Math.random() * 4); // select an edge
     let x, y;
 
     switch (edge) {
@@ -66,13 +73,14 @@ export class Game {
   }
 
   getRandomVelocity() {
-    const speed = 2; // Adjust the asteroid speed as needed
+    const speed = 2; // asteroid speed
     const angle = Math.random() * Math.PI * 2;
     const velocityX = speed * Math.cos(angle);
     const velocityY = speed * Math.sin(angle);
     return { x: velocityX, y: velocityY };
   }
 
+  // start the game
   startGame() {
     this.gameLoopInterval = setInterval(() => {
       this.updateGame();
@@ -84,14 +92,14 @@ export class Game {
   }
 
   shootProjectile() {
-    const speed = 5;
+    const speed = 5; // projectile speed
     const angle = this.player.rotation;
     const velocityX = speed * Math.cos(angle);
     const velocityY = speed * Math.sin(angle);
 
     const projectile = new Projectile(
       {
-        x: this.player.position.x + Math.cos(this.player.rotation) * 30,
+        x: this.player.position.x + Math.cos(this.player.rotation) * 30, // Offset the projectile from the ship's position
         y: this.player.position.y + Math.sin(this.player.rotation) * 30
       },
       { x: velocityX, y: velocityY }
@@ -107,15 +115,28 @@ export class Game {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.player.update(this.context);
-    this.player.draw(this.context);
+    this.player.update(this.context); // update player ship
+    this.player.draw(this.context); // draw player ship
 
+    // wrap player ship
+    if (this.player.position.y < 0) {
+      this.player.position.y = this.canvas.height;
+    } else if (this.player.position.y > this.canvas.height) {
+      this.player.position.y = 0;
+    }
+    if (this.player.position.x < 0) {
+      this.player.position.x = this.canvas.width;
+    } else if (this.player.position.x > this.canvas.width) {
+      this.player.position.x = 0;
+    }
+
+    // update and draw projectiles
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
       projectile.update();
       projectile.draw(this.context);
 
-      // Remove projectiles off screen
+      // remove projectiles off screen
       if (
         projectile.position.x + projectile.radius < 0 ||
         projectile.position.x - projectile.radius > this.canvas.width ||
@@ -126,11 +147,11 @@ export class Game {
       }
     }
 
+    // update and draw asteroids
     for (let i = this.asteroids.length - 1; i >= 0; i--) {
       const asteroid = this.asteroids[i];
       asteroid.update(this.canvas);
       asteroid.draw(this.context);
-
     }
   }
 }
