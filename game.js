@@ -1,6 +1,9 @@
 import { PlayerShip } from './ship.js';
 import { Asteroid } from './asteroids.js';
 import { Movement } from './movement.js';
+import { Projectile } from './projectile.js';
+
+
 
 export class Game {
   constructor() {
@@ -19,9 +22,9 @@ export class Game {
 
     this.movement = new Movement(this.player);
 
-
     this.asteroid = new Asteroid({ x: 100, y: 100 }, { x: 2, y: 2 }, 20);
 
+    this.projectiles = []; // Initialize the projectiles array
   }
 
   startGame() {
@@ -35,14 +38,30 @@ export class Game {
   }
 
   updateGame() {
+    this.context.resetTransform();
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.player.update(this.context); // update method of the ship
-    this.player.draw(this.context); // draw method of the ship
+    this.player.update(this.context);
+    this.player.draw(this.context);
 
-    this.asteroid.update(this.context); //update method of the asteroid
-    this.asteroid.draw(this.context); // draw method of the asteroid
+    this.asteroid.update(this.context);
+    this.asteroid.draw(this.context);
+
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const projectile = this.projectiles[i];
+      projectile.update();
+      projectile.draw();
+
+      // Remove projectiles that are off-screen or expired
+      if (
+        projectile.position.x > this.canvas.width ||
+        projectile.position.y > this.canvas.height ||
+        projectile.position.x < 0 ||
+        projectile.position.y < 0
+      ) {
+        this.projectiles.splice(j, 1);
+      }
+    }
   }
 }
-
