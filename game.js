@@ -115,10 +115,11 @@ export class Game {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.player.update(this.context); // update player ship
-    this.player.draw(this.context); // draw player ship
+    // update and draw the player ship
+    this.player.update(this.context);
+    this.player.draw(this.context);
 
-    // wrap player ship
+    // wrap the player ship around the screen
     if (this.player.position.y < 0) {
       this.player.position.y = this.canvas.height;
     } else if (this.player.position.y > this.canvas.height) {
@@ -136,7 +137,7 @@ export class Game {
       projectile.update();
       projectile.draw(this.context);
 
-      // remove projectiles off screen
+      // remove projectiles off-screen
       if (
         projectile.position.x + projectile.radius < 0 ||
         projectile.position.x - projectile.radius > this.canvas.width ||
@@ -144,6 +145,21 @@ export class Game {
         projectile.position.y + projectile.radius < 0
       ) {
         this.projectiles.splice(i, 1);
+        continue;
+      }
+
+      // check for collisions between projectiles and asteroids
+      for (let j = this.asteroids.length - 1; j >= 0; j--) {
+        const asteroid = this.asteroids[j];
+        const distance = Math.sqrt(
+          (projectile.position.x - asteroid.position.x) ** 2 +
+          (projectile.position.y - asteroid.position.y) ** 2
+        );
+
+        if (distance <= projectile.radius + asteroid.radius) {
+          this.projectiles.splice(i, 1);
+          this.asteroids.splice(j, 1);
+        }
       }
     }
 
@@ -152,6 +168,21 @@ export class Game {
       const asteroid = this.asteroids[i];
       asteroid.update(this.canvas);
       asteroid.draw(this.context);
+
+
+      // calculate distance between player and asteroid
+      const dx = this.player.position.x - asteroid.position.x;
+      const dy = this.player.position.y - asteroid.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // check if distance is less than collision threshold
+      if (distance < asteroid.radius + 10) {
+        alert('You Loose')
+        // stop game
+        this.stopGame();
+        break; //exit the loop
+      }
     }
   }
 }
+
