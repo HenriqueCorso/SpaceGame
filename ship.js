@@ -16,6 +16,7 @@ export class PlayerShip {
     context.lineTo(-10, 10);
     context.closePath();
 
+    context.lineWidth = 2
     context.strokeStyle = 'white';
     context.stroke();
   }
