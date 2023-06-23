@@ -3,6 +3,7 @@ export class Movement {
     this.playerShip = playerShip;
     this.game = game;
     this.keyState = {};
+    this.isFiring = false; // flag to track firing state
     this.registerEventListeners();
   }
 
@@ -48,7 +49,12 @@ export class Movement {
     }
 
     if (keyState['Space']) {
-      game.shootProjectile();
+      if (!this.isFiring) { // only fire if not already firing
+        game.shootProjectile();
+        this.isFiring = true; // set firing flag to true
+      }
+    } else {
+      this.isFiring = false; // reset firing flag when space bar is released
     }
   }
 }
