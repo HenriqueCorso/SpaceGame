@@ -6,11 +6,10 @@ export class PlayerShip {
   }
 
   draw(context) {
-    context.resetTransform(); // Reset the canvas coordinate system
-    context.translate(this.position.x, this.position.y); // Translate to the ship's position
-    context.rotate(this.rotation); // Rotate the canvas
+    context.resetTransform();
+    context.translate(this.position.x, this.position.y);
+    context.rotate(this.rotation);
 
-    // Draw the ship's graphics here
     context.beginPath();
     context.moveTo(30, 0);
     context.lineTo(-10, -10);
@@ -21,9 +20,9 @@ export class PlayerShip {
     context.stroke();
   }
 
-  update(context) {
-    this.draw(context);
+  update() {
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
   }
 }
+
