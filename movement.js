@@ -27,15 +27,18 @@ export class Movement {
 
   updateMovement() {
     const { keyState, playerShip, game } = this;
-    const acceleration = 0.2; // acceleration
+    const acceleration = 0.1; // acceleration
     const maxSpeed = 4; // maximum speed
 
+    // accelerate the ship
     if (keyState['KeyW']) {
-      const speed = Math.sqrt(playerShip.velocity.x ** 2 + playerShip.velocity.y ** 2); // calculate speed
-      if (speed < maxSpeed) {
-        const angle = playerShip.rotation;
-        const velocityX = playerShip.velocity.x + acceleration * Math.cos(angle);
-        const velocityY = playerShip.velocity.y + acceleration * Math.sin(angle);
+      const angle = playerShip.rotation;
+      const velocityX = playerShip.velocity.x + acceleration * Math.cos(angle);
+      const velocityY = playerShip.velocity.y + acceleration * Math.sin(angle);
+
+      // apply maximum speed limit
+      const speed = Math.sqrt(velocityX ** 2 + velocityY ** 2);
+      if (speed <= maxSpeed) {
         playerShip.velocity = { x: velocityX, y: velocityY }; // update velocity
       }
     } else {
@@ -43,6 +46,7 @@ export class Movement {
       playerShip.velocity.y *= 0.99; // friction y
     }
 
+    // Rotate the ship
     if (keyState['KeyA']) {
       playerShip.rotation -= 0.1;
     }
@@ -51,6 +55,7 @@ export class Movement {
       playerShip.rotation += 0.1;
     }
 
+    // Fire projectiles
     if (keyState['Space']) {
       if (!this.isFiring) { // only fire if not already firing
         game.shootProjectile();
