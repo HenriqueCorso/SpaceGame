@@ -158,7 +158,6 @@ export class Game {
         // toggle visibility every blinkInterval
         if (Math.floor(this.invulnerabilityDuration / blinkInterval) % 2 === 0) {
           // update and draw the player ship
-          this.player.update(this.context);
           this.player.draw(this.context);
         }
       }
