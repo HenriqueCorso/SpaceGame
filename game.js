@@ -115,6 +115,8 @@ export class Game {
   }
 
   updateGame() {
+    this.movement.updateMovement();
+
     this.context.resetTransform();
 
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
