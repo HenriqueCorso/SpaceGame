@@ -27,6 +27,11 @@ export class Game {
     // start movement
     this.movement = new Movement(this.player, this);
 
+    // track invulnerability
+    this.isShipInvulnerable = false;
+    this.invulnerabilityDuration = 2000; // invulnerable timer
+
+
     this.projectiles = [];
 
     this.asteroids = [];
@@ -91,9 +96,11 @@ export class Game {
       this.updateGame();
     }, 1000 / 60);
   }
-
+  // stop game
   stopGame() {
     clearInterval(this.gameLoopInterval);
+    //reloads page
+    location.reload();
   }
 
   shootProjectile() {
@@ -127,7 +134,6 @@ export class Game {
     const currentTime = new Date().getTime();
     const elapsedTime = Math.floor((currentTime - this.startTime) / 1000); // convert to seconds
 
-
     // update HUD
     const hudScore = document.getElementById('score');
     const hudLives = document.getElementById('lives');
@@ -136,9 +142,31 @@ export class Game {
     hudScore.textContent = `Score: ${this.score}`;
     hudLives.textContent = `Lives: ${this.lives}`;
 
-    // update and draw the player ship
-    this.player.update(this.context);
-    this.player.draw(this.context);
+    // check if ship is invulnerable
+    if (this.isShipInvulnerable) {
+      // decrement the invulnerability duration
+      this.invulnerabilityDuration -= 1000 / 60;
+
+      // check if invulnerability duration has ended
+      if (this.invulnerabilityDuration <= 0) {
+        this.isShipInvulnerable = false;
+        this.invulnerabilityDuration = 2000; // reset the invulnerability duration for the next life
+      } else {
+        // blink the ship
+        const blinkInterval = 200; // milliseconds
+
+        // toggle visibility every blinkInterval
+        if (Math.floor(this.invulnerabilityDuration / blinkInterval) % 2 === 0) {
+          // update and draw the player ship
+          this.player.update(this.context);
+          this.player.draw(this.context);
+        }
+      }
+    } else {
+      // update and draw the player ship
+      this.player.update(this.context);
+      this.player.draw(this.context);
+    }
 
     // wrap the player ship around the screen
     if (this.player.position.y < 0) {
@@ -200,7 +228,7 @@ export class Game {
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       // check if distance is less than collision threshold
-      if (distance < asteroid.radius + 10) {
+      if (distance < asteroid.radius + 10 && !this.isShipInvulnerable) {
         // decrement lives
         this.lives--;
 
@@ -221,9 +249,9 @@ export class Game {
               return distance < asteroid.radius + 10;
             });
           }
-
           this.player.position = { x: randomX, y: randomY };
           this.player.velocity = { x: 0, y: 0 }; // set ship velocity to zero
+          this.isShipInvulnerable = true; // set ship invulnerability for 2 seconds
         } else {
           alert('Game Over');
           this.stopGame();
