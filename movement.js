@@ -2,7 +2,12 @@ export class Movement {
   constructor(playerShip, game) {
     this.playerShip = playerShip;
     this.game = game;
-    this.keyState = {};
+    this.keyState = {
+      KeyW: false,
+      KeyA: false,
+      KeyD: false,
+      Space: false
+    };
     this.isFiring = false; // flag to track firing state
     this.registerEventListeners();
   }
