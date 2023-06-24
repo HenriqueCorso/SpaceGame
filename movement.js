@@ -19,12 +19,10 @@ export class Movement {
 
   handleKeyDown(event) {
     this.keyState[event.code] = true;
-    this.updateMovement();
   }
 
   handleKeyUp(event) {
     this.keyState[event.code] = false;
-    this.updateMovement();
   }
 
   updateMovement() {
@@ -46,11 +44,11 @@ export class Movement {
     }
 
     if (keyState['KeyA']) {
-      playerShip.rotation -= 0.2;
+      playerShip.rotation -= 0.1;
     }
 
     if (keyState['KeyD']) {
-      playerShip.rotation += 0.2;
+      playerShip.rotation += 0.1;
     }
 
     if (keyState['Space']) {
