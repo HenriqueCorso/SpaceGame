@@ -31,63 +31,12 @@ export class Game {
     this.isShipInvulnerable = false;
     this.invulnerabilityDuration = 2000; // invulnerable timer
 
-
+    // asteroids and projectiles array
     this.projectiles = [];
-
     this.asteroids = [];
 
     // add asteroids
-    this.spawnAsteroids();
-  }
-
-  spawnAsteroids() {
-    const spawnInterval = 2000; // interval between asteroid
-    const maxAsteroids = 50; // maximum number of asteroids
-
-    setInterval(() => {
-      if (this.asteroids.length < maxAsteroids) {
-        const radius = Math.floor(Math.random() * 41) + 10; // random radius
-        const position = this.getRandomEdgePosition(radius); // random edge position
-        const velocity = this.getRandomVelocity(); // random velocity
-
-        const asteroid = new Asteroid(position, velocity, radius); // new asteroid
-        this.asteroids.push(asteroid);
-      }
-    }, spawnInterval);
-  }
-
-  getRandomEdgePosition(radius) {
-    const edge = Math.floor(Math.random() * 4); // select an edge
-    let x, y;
-
-    switch (edge) {
-      case 0: // Top edge
-        x = Math.random() * this.canvas.width;
-        y = -radius;
-        break;
-      case 1: // Right edge
-        x = this.canvas.width + radius;
-        y = Math.random() * this.canvas.height;
-        break;
-      case 2: // Bottom edge
-        x = Math.random() * this.canvas.width;
-        y = this.canvas.height + radius;
-        break;
-      case 3: // Left edge
-        x = -radius;
-        y = Math.random() * this.canvas.height;
-        break;
-    }
-
-    return { x, y };
-  }
-
-  getRandomVelocity() {
-    const speed = 2; // asteroid speed
-    const angle = Math.random() * Math.PI * 2;
-    const velocityX = speed * Math.cos(angle);
-    const velocityY = speed * Math.sin(angle);
-    return { x: velocityX, y: velocityY };
+    Asteroid.spawnAsteroids(this);
   }
 
   // start the game
