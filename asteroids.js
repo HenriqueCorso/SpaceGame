@@ -33,4 +33,54 @@ export class Asteroid {
       this.position.y = -this.radius;
     }
   }
+
+  static spawnAsteroids(game) {
+    const spawnInterval = 2000; // interval between asteroid spawns
+    const maxAsteroids = 50; // maximum number of asteroids
+
+    setInterval(() => {
+      if (game.asteroids.length < maxAsteroids) {
+        const radius = Math.floor(Math.random() * 41) + 10; // random radius
+        const position = Asteroid.getRandomEdgePosition(game.canvas, radius); // random edge position
+        const velocity = Asteroid.getRandomVelocity(); // random velocity
+
+        const asteroid = new Asteroid(position, velocity, radius); // new asteroid
+        game.asteroids.push(asteroid);
+      }
+    }, spawnInterval);
+  }
+
+  static getRandomEdgePosition(canvas, radius) {
+    const edge = Math.floor(Math.random() * 4); // select an edge
+    let x, y;
+
+    switch (edge) {
+      case 0: // Top edge
+        x = Math.random() * canvas.width;
+        y = -radius;
+        break;
+      case 1: // Right edge
+        x = canvas.width + radius;
+        y = Math.random() * canvas.height;
+        break;
+      case 2: // Bottom edge
+        x = Math.random() * canvas.width;
+        y = canvas.height + radius;
+        break;
+      case 3: // Left edge
+        x = -radius;
+        y = Math.random() * canvas.height;
+        break;
+    }
+
+    return { x, y };
+  }
+
+  static getRandomVelocity() {
+    const speed = 2; // asteroid speed
+    const angle = Math.random() * Math.PI * 2;
+    const velocityX = speed * Math.cos(angle);
+    const velocityY = speed * Math.sin(angle);
+    return { x: velocityX, y: velocityY };
+  }
 }
