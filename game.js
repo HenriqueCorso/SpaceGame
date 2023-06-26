@@ -2,6 +2,8 @@ import { PlayerShip } from './ship.js';
 import { Asteroid } from './asteroids.js';
 import { Movement } from './movement.js';
 import { Projectile } from './projectile.js';
+import { EnemyShip } from './enemy.js';
+
 
 export class Game {
   constructor() {
@@ -23,6 +25,10 @@ export class Game {
       position: { x: this.canvas.width / 2, y: this.canvas.height / 2 },
       velocity: { x: 0, y: 0 }
     });
+
+    this.enemy = null; // Add this line
+    // spawn the enemy ship
+    this.spawnEnemy();
 
     // start movement
     this.movement = new Movement(this.player, this);
@@ -50,6 +56,18 @@ export class Game {
     clearInterval(this.gameLoopInterval);
     //reloads page
     location.reload();
+  }
+
+  spawnEnemy() {
+    // calculate initial position and velocity
+    const screenWidth = this.canvas.width;
+    const screenHeight = this.canvas.height;
+
+    const position = { x: 0, y: Math.random() * screenHeight };
+    const velocity = { x: 3, y: 0 };
+
+    // create the enemy ship
+    this.enemy = new EnemyShip({ position, velocity });
   }
 
   shootProjectile() {
@@ -114,6 +132,49 @@ export class Game {
       // update and draw the player ship
       this.player.update(this.context);
       this.player.draw(this.context);
+    }
+
+    // update and draw the enemy ship
+    this.enemy.update();
+    this.enemy.draw(this.context);
+
+    // check if the enemy ship is off-screen
+    const enemyRadius = 10; // Adjust the value according to the enemy ship's radius
+    const isOffScreen = (
+      this.enemy.position.x + enemyRadius < 0 ||
+      this.enemy.position.x - enemyRadius > this.canvas.width ||
+      this.enemy.position.y - enemyRadius > this.canvas.height ||
+      this.enemy.position.y + enemyRadius < 0
+    );
+
+    // check for collisions between projectiles and enemy ship
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const projectile = this.projectiles[i];
+      projectile.update();
+      projectile.draw(this.context);
+
+      // check for collision with enemy ship
+      const dx = this.enemy.position.x - projectile.position.x;
+      const dy = this.enemy.position.y - projectile.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 20 + projectile.radius) {
+        // remove the projectile and the enemy ship
+        this.projectiles.splice(i, 1);
+        this.enemy = null;
+
+        // increment score
+        this.score += 20;
+
+        // respawn the enemy ship
+        this.spawnEnemy();
+      }
+    }
+
+
+    if (isOffScreen) {
+      // Respawn the enemy ship
+      this.spawnEnemy();
     }
 
     // wrap the player ship around the screen
