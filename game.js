@@ -43,6 +43,9 @@ export class Game {
     this.projectiles = [];
     this.asteroids = [];
 
+    this.startTime = new Date().getTime(); // start time
+    this.shootStartTime = this.startTime; // initial shoot start time
+
     // add asteroids
     Asteroid.spawnAsteroids(this);
   }
@@ -292,7 +295,7 @@ export class Game {
       const dy = this.player.position.y - projectile.position.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < 20 + projectile.radius) {
+      if (distance < 10 + projectile.radius) {
         this.enemyProjectiles.splice(i, 1);
         this.lives--;
 
@@ -312,14 +315,14 @@ export class Game {
 
   enemyShootInterval() {
     const currentTime = new Date().getTime();
-    const elapsedTime = currentTime - this.startTime;
+    const elapsedTime = currentTime - this.shootStartTime;
 
     // Shoot enemy projectile every 3 seconds
     const shootEnemyInterval = 3000;
 
     if (elapsedTime > shootEnemyInterval) {
+      this.shootStartTime = currentTime; // Update the shoot start time
       this.shootEnemyProjectile();
-      this.startTime = currentTime;
     }
   }
 
