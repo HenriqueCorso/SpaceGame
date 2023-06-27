@@ -25,7 +25,11 @@ export class Game {
       velocity: { x: 0, y: 0 }
     });
 
-    this.enemy = null;
+    this.isEnemyAlive = false;
+
+    this.enemyRespawnDelay = 3000; // 3 seconds delay in milliseconds
+    this.enemyRespawnTimeout = null;
+
     this.enemyProjectiles = []; // array for enemy projectiles
 
     // spawn the enemy ship
@@ -48,6 +52,8 @@ export class Game {
     // add asteroids
     Asteroid.spawnAsteroids(this);
   }
+
+
 
   // start the game
   startGame() {
@@ -74,6 +80,10 @@ export class Game {
     hudLives.textContent = `Lives: ${this.lives}`;
   }
   spawnEnemy() {
+    if (this.isEnemyAlive) {
+      return; // Return early if the enemy ship is already alive
+    }
+
     // Randomly determine the side from which the enemy ship will appear
     const spawnFromLeft = Math.random() < 0.5;
 
@@ -93,11 +103,21 @@ export class Game {
 
     // Create the enemy ship
     this.enemy = new EnemyShip({ position, velocity });
+    this.isEnemyAlive = true;
+
+    if (this.isEnemyAlive) {
+      return; // Return early if the enemy ship is already alive
+    }
+    // Set a respawn timeout
+    this.enemyRespawnTimeout = setTimeout(() => {
+      this.isEnemyAlive = false;
+      this.spawnEnemy();
+    }, this.enemyRespawnDelay);
   }
 
   // player projectile
   shootProjectile() {
-    const speed = 5; // projectile speed
+    const speed = 8; // projectile speed
     const angle = this.player.rotation;
     const velocityX = speed * Math.cos(angle);
     const velocityY = speed * Math.sin(angle);
@@ -165,6 +185,9 @@ export class Game {
   }
   // check if enemy is off screen
   checkEnemyOffScreen() {
+    if (!this.isEnemyAlive) {
+      return; // Return early if the enemy ship is not alive
+    }
     const enemyRadius = 10;
     const isOffScreen =
       this.enemy.position.x + enemyRadius < 0 ||
@@ -173,12 +196,19 @@ export class Game {
       this.enemy.position.y + enemyRadius < 0;
 
     if (isOffScreen) {
-      this.spawnEnemy();
+      this.isEnemyAlive = false;
+      clearTimeout(this.enemyRespawnTimeout); // Clear the respawn timeout
+      this.enemyRespawnTimeout = setTimeout(() => {
+        this.spawnEnemy();
+      }, this.enemyRespawnDelay);
     }
   }
 
   // check collision between projectile and enemy
   checkProjectileEnemyCollision() {
+    if (!this.isEnemyAlive) {
+      return; // Return early if the enemy ship is not alive
+    }
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
       projectile.update();
@@ -190,9 +220,11 @@ export class Game {
 
       if (distance < 20 + projectile.radius) {
         this.projectiles.splice(i, 1);
-        this.enemy = null;
-        this.score += 20;
-        this.spawnEnemy();
+        this.isEnemyAlive = false;
+        clearTimeout(this.enemyRespawnTimeout); // Clear the respawn timeout
+        this.enemyRespawnTimeout = setTimeout(() => {
+          this.spawnEnemy();
+        }, this.enemyRespawnDelay);
       }
     }
   }
@@ -262,6 +294,9 @@ export class Game {
   }
 
   shootEnemyProjectile() {
+    if (!this.isEnemyAlive) {
+      return; // Return early if the enemy ship is not alive
+    }
     const projectile = new EnemyProjectile(
       { x: this.enemy.position.x, y: this.enemy.position.y },
       { x: 0, y: 0 } // Set initial velocity as 0, it will be updated later
@@ -368,8 +403,10 @@ export class Game {
     this.enemyShootInterval();
 
 
-    // update and draw the enemy ship
-    this.enemy.update();
-    this.enemy.draw(this.context);
+    // update and draw the enemy ship if it is alive
+    if (this.isEnemyAlive) {
+      this.enemy.update();
+      this.enemy.draw(this.context);
+    }
   }
 }
