@@ -1,7 +1,7 @@
 import { PlayerShip } from './ship.js';
 import { Asteroid } from './asteroids.js';
 import { Movement } from './movement.js';
-import { Projectile } from './projectile.js';
+import { Projectile, EnemyProjectile } from './projectile.js';
 import { EnemyShip } from './enemy.js';
 
 
@@ -26,7 +26,9 @@ export class Game {
       velocity: { x: 0, y: 0 }
     });
 
-    this.enemy = null; // Add this line
+    this.enemy = null;
+    this.enemyProjectiles = []; // array for enemy projectiles
+
     // spawn the enemy ship
     this.spawnEnemy();
 
@@ -58,6 +60,18 @@ export class Game {
     location.reload();
   }
 
+  // calculate elapsed time add and update HUD
+  updateHUD() {
+    const currentTime = new Date().getTime();
+    const elapsedTime = Math.floor((currentTime - this.startTime) / 1000); // convert to seconds
+    const hudScore = document.getElementById('score');
+    const hudLives = document.getElementById('lives');
+    const hudTime = document.getElementById('time');
+    hudTime.textContent = `Time: ${elapsedTime}`;
+    hudScore.textContent = `Score: ${this.score}`;
+    hudLives.textContent = `Lives: ${this.lives}`;
+  }
+
   spawnEnemy() {
     // calculate initial position and velocity
     const screenWidth = this.canvas.width;
@@ -70,6 +84,7 @@ export class Game {
     this.enemy = new EnemyShip({ position, velocity });
   }
 
+  // player projectile
   shootProjectile() {
     const speed = 5; // projectile speed
     const angle = this.player.rotation;
@@ -88,96 +103,8 @@ export class Game {
     this.projectiles.push(projectile);
   }
 
-  updateGame() {
-    this.movement.updateMovement();
-
-    this.context.resetTransform();
-
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // calculate elapsed time
-    const currentTime = new Date().getTime();
-    const elapsedTime = Math.floor((currentTime - this.startTime) / 1000); // convert to seconds
-
-    // update HUD
-    const hudScore = document.getElementById('score');
-    const hudLives = document.getElementById('lives');
-    const hudTime = document.getElementById('time');
-    hudTime.textContent = `Time: ${elapsedTime}`;
-    hudScore.textContent = `Score: ${this.score}`;
-    hudLives.textContent = `Lives: ${this.lives}`;
-
-    // check if ship is invulnerable
-    if (this.isShipInvulnerable) {
-      // decrement the invulnerability duration
-      this.invulnerabilityDuration -= 1000 / 60;
-
-      // check if invulnerability duration has ended
-      if (this.invulnerabilityDuration <= 0) {
-        this.isShipInvulnerable = false;
-        this.invulnerabilityDuration = 2000; // reset the invulnerability duration for the next life
-      } else {
-        // blink the ship
-        const blinkInterval = 200; // milliseconds
-
-        // toggle visibility every blinkInterval
-        if (Math.floor(this.invulnerabilityDuration / blinkInterval) % 2 === 0) {
-          // update and draw the player ship
-          this.player.draw(this.context);
-        }
-      }
-    } else {
-      // update and draw the player ship
-      this.player.update(this.context);
-      this.player.draw(this.context);
-    }
-
-    // update and draw the enemy ship
-    this.enemy.update();
-    this.enemy.draw(this.context);
-
-    // check if the enemy ship is off-screen
-    const enemyRadius = 10; // Adjust the value according to the enemy ship's radius
-    const isOffScreen = (
-      this.enemy.position.x + enemyRadius < 0 ||
-      this.enemy.position.x - enemyRadius > this.canvas.width ||
-      this.enemy.position.y - enemyRadius > this.canvas.height ||
-      this.enemy.position.y + enemyRadius < 0
-    );
-
-    // check for collisions between projectiles and enemy ship
-    for (let i = this.projectiles.length - 1; i >= 0; i--) {
-      const projectile = this.projectiles[i];
-      projectile.update();
-      projectile.draw(this.context);
-
-      // check for collision with enemy ship
-      const dx = this.enemy.position.x - projectile.position.x;
-      const dy = this.enemy.position.y - projectile.position.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < 20 + projectile.radius) {
-        // remove the projectile and the enemy ship
-        this.projectiles.splice(i, 1);
-        this.enemy = null;
-
-        // increment score
-        this.score += 20;
-
-        // respawn the enemy ship
-        this.spawnEnemy();
-      }
-    }
-
-
-    if (isOffScreen) {
-      // Respawn the enemy ship
-      this.spawnEnemy();
-    }
-
-    // wrap the player ship around the screen
+  // wrap the player ship around the screen
+  checkPlayerShipWraparound() {
     if (this.player.position.y < 0) {
       this.player.position.y = this.canvas.height;
     } else if (this.player.position.y > this.canvas.height) {
@@ -188,8 +115,79 @@ export class Game {
     } else if (this.player.position.x > this.canvas.width) {
       this.player.position.x = 0;
     }
+  }
+  // reset and clear the canvas
+  clearCanvas() {
+    this.context.resetTransform();
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = 'black';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
 
-    // update and draw projectiles
+  // update and draw the player ship
+  updatePlayerShip() {
+    if (this.isShipInvulnerable) {
+      this.updateInvulnerablePlayerShip();
+    } else {
+      this.player.update(this.context);
+      this.player.draw(this.context);
+    }
+  }
+
+  // check if ship is invulnerable
+  updateInvulnerablePlayerShip() {
+    // decrement the invulnerability duration
+    this.invulnerabilityDuration -= 1000 / 60;
+
+    if (this.invulnerabilityDuration <= 0) {
+      this.isShipInvulnerable = false;
+      this.invulnerabilityDuration = 2000; // reset the invulnerability duration for the next life
+    } else {
+      // blink the ship
+      const blinkInterval = 200;  // milliseconds
+
+      // toggle visibility every blinkInterval
+      if (Math.floor(this.invulnerabilityDuration / blinkInterval) % 2 === 0) {
+        this.player.draw(this.context);
+      }
+    }
+  }
+  // check if enemy is off screen
+  checkEnemyOffScreen() {
+    const enemyRadius = 10;
+    const isOffScreen =
+      this.enemy.position.x + enemyRadius < 0 ||
+      this.enemy.position.x - enemyRadius > this.canvas.width ||
+      this.enemy.position.y - enemyRadius > this.canvas.height ||
+      this.enemy.position.y + enemyRadius < 0;
+
+    if (isOffScreen) {
+      this.spawnEnemy();
+    }
+  }
+
+  // check collision between projectile and enemy
+  checkProjectileEnemyCollision() {
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const projectile = this.projectiles[i];
+      projectile.update();
+      projectile.draw(this.context);
+
+      const dx = this.enemy.position.x - projectile.position.x;
+      const dy = this.enemy.position.y - projectile.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 20 + projectile.radius) {
+        this.projectiles.splice(i, 1);
+        this.enemy = null;
+        this.score += 20;
+        this.spawnEnemy();
+      }
+    }
+  }
+
+  // update and draw projectiles
+  updateProjectiles() {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
       projectile.update();
@@ -223,13 +221,14 @@ export class Game {
         }
       }
     }
+  }
 
-    // update and draw asteroids
+  // update and draw asteroids
+  updateAsteroids() {
     for (let i = this.asteroids.length - 1; i >= 0; i--) {
       const asteroid = this.asteroids[i];
-      asteroid.update(this.canvas);
+      asteroid.update();
       asteroid.draw(this.context);
-
 
       // calculate distance between player and asteroid
       const dx = this.player.position.x - asteroid.position.x;
@@ -238,34 +237,127 @@ export class Game {
 
       // check if distance is less than collision threshold
       if (distance < asteroid.radius + 10 && !this.isShipInvulnerable) {
-        // decrement lives
+        this.asteroids.splice(i, 1);
         this.lives--;
 
-        if (this.lives > 0) {
-          // reset player position to a random location without asteroids
-          let isOverlap = true;
-          let randomX, randomY;
-
-          while (isOverlap) {
-            randomX = Math.random() * this.canvas.width;
-            randomY = Math.random() * this.canvas.height;
-
-            // check if the new position overlaps with any asteroids
-            isOverlap = this.asteroids.some((asteroid) => {
-              const dx = randomX - asteroid.position.x;
-              const dy = randomY - asteroid.position.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              return distance < asteroid.radius + 10;
-            });
-          }
-          this.player.position = { x: randomX, y: randomY };
-          this.player.velocity = { x: 0, y: 0 }; // set ship velocity to zero
-          this.isShipInvulnerable = true; // set ship invulnerability for 2 seconds
-        } else {
-          alert('Game Over');
+        if (this.lives <= 0) {
+          alert('Game Over')
           this.stopGame();
+        } else {
+          this.isShipInvulnerable = true;
         }
       }
     }
+  }
+
+  shootEnemyProjectile() {
+    const projectile = new EnemyProjectile(
+      { x: this.enemy.position.x, y: this.enemy.position.y },
+      { x: 0, y: 0 } // Set initial velocity as 0, it will be updated later
+    );
+
+    // Calculate the direction and velocity towards the player
+    const dx = this.player.position.x - this.enemy.position.x;
+    const dy = this.player.position.y - this.enemy.position.y;
+    const angle = Math.atan2(dy, dx);
+    const speed = 4;
+    projectile.velocity.x = speed * Math.cos(angle);
+    projectile.velocity.y = speed * Math.sin(angle);
+
+    this.enemyProjectiles.push(projectile);
+
+  }
+
+  updateEnemyProjectiles() {
+    for (let i = this.enemyProjectiles.length - 1; i >= 0; i--) {
+      const projectile = this.enemyProjectiles[i];
+      projectile.update();
+      projectile.draw(this.context);
+
+      if (
+        projectile.position.x + projectile.radius < 0 ||
+        projectile.position.x - projectile.radius > this.canvas.width ||
+        projectile.position.y - projectile.radius > this.canvas.height ||
+        projectile.position.y + projectile.radius < 0
+      ) {
+        this.enemyProjectiles.splice(i, 1);
+        continue;
+      }
+
+      if (this.isShipInvulnerable) {
+        continue; // Skip collision detection when player is invulnerable
+      }
+      
+      const dx = this.player.position.x - projectile.position.x;
+      const dy = this.player.position.y - projectile.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 20 + projectile.radius) {
+        this.enemyProjectiles.splice(i, 1);
+        this.lives--;
+
+        if (this.lives <= 0) {
+          alert('Game Over')
+          this.stopGame();
+        } else {
+          this.player.position.x = this.canvas.width / 2;
+          this.player.position.y = this.canvas.height / 2;
+          this.isShipInvulnerable = true;
+        }
+        break;
+      }
+    }
+  }
+
+  enemyShootInterval() {
+    const currentTime = new Date().getTime();
+    const elapsedTime = currentTime - this.startTime;
+
+    // Shoot enemy projectile every 3 seconds
+    const shootEnemyInterval = 3000;
+
+    if (elapsedTime > shootEnemyInterval) {
+      this.shootEnemyProjectile();
+      this.startTime = currentTime;
+    }
+  }
+
+  updateGame() {
+
+    // clear canvas
+    this.clearCanvas();
+
+    // update movement
+    this.movement.updateMovement();
+
+    // update HUD
+    this.updateHUD();
+
+    //update player ship
+    this.updatePlayerShip();
+
+    // check if the enemy ship is off-screen
+    this.checkEnemyOffScreen();
+
+    // check for collisions between projectiles and enemy ship
+    this.checkProjectileEnemyCollision();
+
+    // wrap the player ship around the screen
+    this.checkPlayerShipWraparound();
+
+    // update and draw projectiles and check for collision
+    this.updateProjectiles();
+
+    // update and draw asteroids and check for collision
+    this.updateAsteroids();
+
+    this.updateEnemyProjectiles();
+    this.checkProjectileEnemyCollision();
+    this.enemyShootInterval();
+
+
+    // update and draw the enemy ship
+    this.enemy.update();
+    this.enemy.draw(this.context);
   }
 }
