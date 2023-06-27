@@ -287,7 +287,7 @@ export class Game {
       if (this.isShipInvulnerable) {
         continue; // Skip collision detection when player is invulnerable
       }
-      
+
       const dx = this.player.position.x - projectile.position.x;
       const dy = this.player.position.y - projectile.position.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -300,10 +300,11 @@ export class Game {
           alert('Game Over')
           this.stopGame();
         } else {
-          this.player.position.x = this.canvas.width / 2;
-          this.player.position.y = this.canvas.height / 2;
+          this.player.position.x = this.player.position.x;
+          this.player.position.y = this.player.position.y;
           this.isShipInvulnerable = true;
         }
+
         break;
       }
     }
