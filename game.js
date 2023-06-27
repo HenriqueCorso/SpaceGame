@@ -1,8 +1,7 @@
-import { PlayerShip } from './ship.js';
+import { PlayerShip, EnemyShip } from './ship.js';
 import { Asteroid } from './asteroids.js';
 import { Movement } from './movement.js';
 import { Projectile, EnemyProjectile } from './projectile.js';
-import { EnemyShip } from './enemy.js';
 
 
 export class Game {
@@ -74,16 +73,25 @@ export class Game {
     hudScore.textContent = `Score: ${this.score}`;
     hudLives.textContent = `Lives: ${this.lives}`;
   }
-
   spawnEnemy() {
-    // calculate initial position and velocity
+    // Randomly determine the side from which the enemy ship will appear
+    const spawnFromLeft = Math.random() < 0.5;
+
+    // Calculate initial position and velocity based on the spawn side
     const screenWidth = this.canvas.width;
     const screenHeight = this.canvas.height;
 
-    const position = { x: 0, y: Math.random() * screenHeight };
-    const velocity = { x: 3, y: 0 };
+    let position, velocity;
 
-    // create the enemy ship
+    if (spawnFromLeft) {
+      position = { x: 0, y: Math.random() * screenHeight };
+      velocity = { x: 3, y: 0 };
+    } else {
+      position = { x: screenWidth, y: Math.random() * screenHeight };
+      velocity = { x: -3, y: 0 };
+    }
+
+    // Create the enemy ship
     this.enemy = new EnemyShip({ position, velocity });
   }
 
