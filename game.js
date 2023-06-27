@@ -271,7 +271,7 @@ export class Game {
     const dx = this.player.position.x - this.enemy.position.x;
     const dy = this.player.position.y - this.enemy.position.y;
     const angle = Math.atan2(dy, dx);
-    const speed = 4;
+    const speed = 6;
     projectile.velocity.x = speed * Math.cos(angle);
     projectile.velocity.y = speed * Math.sin(angle);
 
