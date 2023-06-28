@@ -35,16 +35,25 @@ export class Asteroid {
   }
 
   static spawnAsteroids(game) {
-    const spawnInterval = 2000; // interval between asteroid spawns
-    const maxAsteroids = 50; // maximum number of asteroids
+    let elapsedTime = 0; // Track the elapsed time
+    const spawnInterval = 2000; // Interval between asteroid spawns
+    const maxAsteroids = 50; // Maximum number of asteroids
+    let asteroidSpeed = 2; // Initial asteroid speed
 
     setInterval(() => {
-      if (game.asteroids.length < maxAsteroids) {
-        const radius = Math.floor(Math.random() * 41) + 10; // random radius
-        const position = Asteroid.getRandomEdgePosition(game.canvas, radius); // random edge position
-        const velocity = Asteroid.getRandomVelocity(); // random velocity
+      elapsedTime += spawnInterval;
 
-        const asteroid = new Asteroid(position, velocity, radius); // new asteroid
+      // Increase asteroid speed every 30 seconds
+      if (elapsedTime % 30000 === 0) {
+        asteroidSpeed++;
+      }
+
+      if (game.asteroids.length < maxAsteroids) {
+        const radius = Math.floor(Math.random() * 41) + 10; // Random radius
+        const position = Asteroid.getRandomEdgePosition(game.canvas, radius); // Random edge position
+        const velocity = Asteroid.getRandomVelocity(asteroidSpeed); // Random velocity with updated speed
+
+        const asteroid = new Asteroid(position, velocity, radius); // New asteroid
         game.asteroids.push(asteroid);
       }
     }, spawnInterval);
@@ -76,8 +85,7 @@ export class Asteroid {
     return { x, y };
   }
 
-  static getRandomVelocity() {
-    const speed = 2; // asteroid speed
+  static getRandomVelocity(speed) {
     const angle = Math.random() * Math.PI * 2;
     const velocityX = speed * Math.cos(angle);
     const velocityY = speed * Math.sin(angle);
