@@ -211,8 +211,6 @@ export class Game {
     }
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
-      projectile.update();
-      projectile.draw(this.context);
 
       const dx = this.enemy.position.x - projectile.position.x;
       const dy = this.enemy.position.y - projectile.position.y;
