@@ -27,7 +27,7 @@ export class Game {
 
     this.isEnemyAlive = false;
 
-    this.enemyRespawnDelay = 3000; // 3 seconds delay in milliseconds
+    this.enemyRespawnDelay = 5000; // 3 seconds delay in milliseconds
     this.enemyRespawnTimeout = null;
 
     this.enemyProjectiles = []; // array for enemy projectiles
@@ -144,7 +144,7 @@ export class Game {
     if (this.player.position.x < 0) {
       this.player.position.x = this.canvas.width;
     } else if (this.player.position.x > this.canvas.width) {
-      this.player.position.x = 0;
+      this.player.position.x = 0
     }
   }
   // reset and clear the canvas
@@ -219,6 +219,7 @@ export class Game {
       if (distance < 20 + projectile.radius) {
         this.projectiles.splice(i, 1);
         this.isEnemyAlive = false;
+        this.score += 20;
         clearTimeout(this.enemyRespawnTimeout); // Clear the respawn timeout
         this.enemyRespawnTimeout = setTimeout(() => {
           this.spawnEnemy();
@@ -344,8 +345,6 @@ export class Game {
           alert('Game Over')
           this.stopGame();
         } else {
-          this.player.position.x = this.player.position.x;
-          this.player.position.y = this.player.position.y;
           this.isShipInvulnerable = true;
         }
 
