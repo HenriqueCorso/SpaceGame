@@ -42,17 +42,17 @@ export class Movement {
         playerShip.velocity = { x: velocityX, y: velocityY }; // update velocity
       }
     } else {
-      playerShip.velocity.x *= 0.99; // friction x
-      playerShip.velocity.y *= 0.99; // friction y
+      playerShip.velocity.x *= 0.98; // friction x
+      playerShip.velocity.y *= 0.98; // friction y
     }
 
     // Rotate the ship
     if (keyState['KeyA']) {
-      playerShip.rotation -= 0.1;
+      playerShip.rotation -= 0.08;
     }
 
     if (keyState['KeyD']) {
-      playerShip.rotation += 0.1;
+      playerShip.rotation += 0.08;
     }
 
     // Fire projectiles
