@@ -4,9 +4,6 @@ import { Movement } from './movement.js';
 import { Projectile, EnemyProjectile } from './projectile.js';
 
 
-
-
-
 export class Game {
   constructor() {
     this.canvas = document.getElementById('canvas');
@@ -51,10 +48,6 @@ export class Game {
 
     this.startTime = new Date().getTime(); // start time
     this.shootStartTime = this.startTime; // initial shoot start time
-
-    // Add a new variable to track elapsed time
-    this.elapsedTime = 0;
-    this.projectileSpeed = 6; // Initial enemy projectile speed
 
     // add asteroids
     Asteroid.spawnAsteroids(this);
@@ -299,8 +292,6 @@ export class Game {
     }
   }
 
-
-
   shootEnemyProjectile() {
     if (!this.isEnemyAlive) {
       return; // Return early if the enemy ship is not alive
@@ -314,11 +305,12 @@ export class Game {
     const dx = this.player.position.x - this.enemy.position.x;
     const dy = this.player.position.y - this.enemy.position.y;
     const angle = Math.atan2(dy, dx);
-    const speed = this.projectileSpeed;
+    const speed = 6;
     projectile.velocity.x = speed * Math.cos(angle);
     projectile.velocity.y = speed * Math.sin(angle);
 
     this.enemyProjectiles.push(projectile);
+
   }
 
   updateEnemyProjectiles() {
@@ -374,7 +366,6 @@ export class Game {
     }
   }
 
-
   updateGame() {
 
     // clear canvas
@@ -408,20 +399,11 @@ export class Game {
     this.checkProjectileEnemyCollision();
     this.enemyShootInterval();
 
+
     // update and draw the enemy ship if it is alive
     if (this.isEnemyAlive) {
       this.enemy.update();
       this.enemy.draw(this.context);
-
-      // Update elapsed time
-      const currentTime = new Date().getTime();
-      this.elapsedTime = Math.floor((currentTime - this.startTime) / 1000); // convert to seconds
-
-      // Check if 30 seconds have passed to increase the projectile speed
-      if (this.elapsedTime >= 30 && this.elapsedTime % 30 === 0) {
-        this.projectileSpeed += 1; // Increase projectile speed by 1
-      }
-
     }
   }
 }
