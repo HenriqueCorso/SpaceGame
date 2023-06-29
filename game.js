@@ -296,6 +296,7 @@ export class Game {
     if (!this.isEnemyAlive) {
       return; // Return early if the enemy ship is not alive
     }
+
     const projectile = new EnemyProjectile(
       { x: this.enemy.position.x, y: this.enemy.position.y },
       { x: 0, y: 0 } // Set initial velocity as 0, it will be updated later
@@ -305,12 +306,17 @@ export class Game {
     const dx = this.player.position.x - this.enemy.position.x;
     const dy = this.player.position.y - this.enemy.position.y;
     const angle = Math.atan2(dy, dx);
-    const speed = 6;
+    let speed = 6; // Initial projectile speed
+
+    setInterval(() => {
+      speed += 1; // Increase projectile speed by 1
+      console.log('SpeedUp');
+    }, 30000); // Increase speed every 30 seconds
+
     projectile.velocity.x = speed * Math.cos(angle);
     projectile.velocity.y = speed * Math.sin(angle);
 
     this.enemyProjectiles.push(projectile);
-
   }
 
   updateEnemyProjectiles() {
