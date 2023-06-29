@@ -3,7 +3,6 @@ import { Asteroid } from './asteroids.js';
 import { Movement } from './movement.js';
 import { Projectile, EnemyProjectile } from './projectile.js';
 
-
 export class Game {
   constructor() {
     this.canvas = document.getElementById('canvas');
@@ -51,9 +50,35 @@ export class Game {
 
     // add asteroids
     Asteroid.spawnAsteroids(this);
+
+    // Bind the resize event handler to the current instance of the game
+    this.handleResize = this.handleResize.bind(this);
+
+    // Add an event listener for the window resize event
+    window.addEventListener('resize', this.handleResize);
+
+    // Call the handleResize method initially to set the canvas dimensions
+    this.handleResize();
+
+  }
+
+  playEnemySound() {
+    const enemySound = document.getElementById('enemySound');
+    enemySound.play();
+  }
+
+  playAsteroidSound() {
+    const asteroidSound = document.getElementById('asteroidSound');
+    asteroidSound.play();
   }
 
 
+  handleResize() {
+    // Update the canvas dimensions
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+
+  }
 
   // start the game
   startGame() {
@@ -83,6 +108,7 @@ export class Game {
     if (this.isEnemyAlive) {
       return; // Return early if the enemy ship is already alive
     }
+    this.playEnemySound()
 
     // Randomly determine the side from which the enemy ship will appear
     const spawnFromLeft = Math.random() < 0.5;
@@ -220,6 +246,7 @@ export class Game {
         this.projectiles.splice(i, 1);
         this.isEnemyAlive = false;
         this.score += 20;
+        this.playAsteroidSound();
         clearTimeout(this.enemyRespawnTimeout); // Clear the respawn timeout
         this.enemyRespawnTimeout = setTimeout(() => {
           this.spawnEnemy();
@@ -257,6 +284,7 @@ export class Game {
         if (distance <= projectile.radius + asteroid.radius) {
           this.projectiles.splice(i, 1);
           this.asteroids.splice(j, 1);
+          this.playAsteroidSound();
 
           // increment score
           this.score += 10;
