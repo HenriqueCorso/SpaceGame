@@ -12,6 +12,16 @@ export class Movement {
     this.registerEventListeners();
   }
 
+  playFireSound() {
+    const fireSound = document.getElementById('fireSound');
+    fireSound.play();
+  }
+
+  playThrustSound() {
+    const thrustSound = document.getElementById('thrustSound');
+    thrustSound.play();
+  }
+
   registerEventListeners() {
     document.addEventListener('keydown', (event) => this.handleKeyDown(event));
     document.addEventListener('keyup', (event) => this.handleKeyUp(event));
@@ -32,6 +42,8 @@ export class Movement {
 
     // accelerate the ship
     if (keyState['KeyW']) {
+      this.playThrustSound();
+
       const angle = playerShip.rotation;
       const velocityX = playerShip.velocity.x + acceleration * Math.cos(angle);
       const velocityY = playerShip.velocity.y + acceleration * Math.sin(angle);
@@ -59,6 +71,7 @@ export class Movement {
     if (keyState['Space']) {
       if (!this.isFiring) { // only fire if not already firing
         game.shootProjectile();
+        this.playFireSound();
         this.isFiring = true; // set firing flag to true
       }
     } else {
